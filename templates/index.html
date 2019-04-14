@@ -2,9 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Grid monitor</title>
 </head>
 <body>
 <p>Hi!</p>
+<ul>
+  {% for endpoint in endpoints %}
+    <li>{{ endpoint.endpoint_interface_name}}</li>
+  {% endfor %}
+</ul>
 </body>
 </html>

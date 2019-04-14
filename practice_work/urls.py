@@ -17,8 +17,15 @@ from django.contrib import admin
 from django.urls import path
 
 from LdapScheduler import views
+from django.conf.urls import url
+from django.conf.urls.static import static
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from practice_work import settings
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    url(r'interface/(?P<name>[\w.]+)', views.interface),
     path('', views.Home.as_view())
 ]
+

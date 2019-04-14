@@ -130,7 +130,9 @@ def a():
         if "GLUE2EndpointHealthState" in ldap_ee:
             grid_resource_endpoint.health_state = ldap_ee["GLUE2EndpointHealthState"][0].decode('utf-8')
 
+        resource_exists = GridResourceEndpoint.objects.filter(endpoint_id=grid_resource_endpoint.endpoint_id)
 
-        grid_resource_endpoint.save()
+        if not resource_exists:
+            grid_resource_endpoint.save()
 
     print('running periodic task')

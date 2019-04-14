@@ -6,6 +6,8 @@
 </head>
 <body>
 <p>{{ path }}</p>
-<img src="{{ path }}">
+{% load staticfiles %}
+
+<img src="{% static path %}" />
 </body>
 </html>
