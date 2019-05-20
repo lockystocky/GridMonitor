@@ -28,6 +28,11 @@ def interface(request, name=None):
     return render(request, "interface.html", {'path': path})
 
 
+def interfaceinfo(request, name=None):
+    endpoint = GridResourceEndpoint.objects.get(endpoint_interface_name=name)
+    return render(request, "interfaceinfo.html", {'interface': endpoint})
+
+
 class Home(View):
     def get(self, request, *args, **kwargs):
         endpoints = GridResourceEndpoint.objects.all()

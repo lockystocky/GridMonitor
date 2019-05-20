@@ -2,12 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Interface</title>
+    <title>Interface Information</title>
 </head>
 <body>
-<p>{{ path }}</p>
-{% load staticfiles %}
-
-<img src="{% static path %}" />
+<p>Interface name: {{ interface.endpoint_interface_name}}</p>
+<p>Endpoint Id: {{ interface.endpoint_id}}</p>
+<p>Endpoint Url: {{ interface.endpoint_url}}</p>
+<p>OS family: {{ interface.os_family}}</p>
+<p>Platform: {{ interface.platform}}</p>
+<p>Main memory size: {{ interface.main_memory_size}}</p>
+<p>Virtual memory size: {{ interface.virtual_memory_size}}</p>
+<p>Cpu model {{ interface.cpu_model}}</p>
+<p>Cpu clock speed: {{ interface.cpu_clock_speed}}</p>
+<p>Logical CPUs: {{ interface.logical_cpus_count}}</p>
 </body>
 </html>

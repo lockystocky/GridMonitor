@@ -26,6 +26,7 @@ from practice_work import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'interface/(?P<name>[\w.]+)', views.interface),
+    url(r'interfaceinfo/(?P<name>[\w.]+)', views.interfaceinfo),
     path('', views.Home.as_view())
 ]
 
