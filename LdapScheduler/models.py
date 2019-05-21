@@ -22,8 +22,7 @@ class GridResourceEndpoint (models.Model):
     record_time = models.DateTimeField(null=True)
 
     def __str__(self):
-        return 'id: %s time: %s endpointId: %s endpointUrl: %s interfaceName: %s runningJobsCount: %s totalJobsCount: %s waitingJobsCount: %s stagingJobsCount: %s suspendedJobsCount: %s qualityLevel: %s healthState: %s'% (self.id, self.record_time, self.endpoint_id, self.endpoint_url, self.endpoint_interface_name, self.running_jobs_count, self.total_jobs_count, self.waiting_jobs_count, self.staging_jobs_count, self.suspended_jobs_count, self.quality_level, self.health_state)
-
+        return 'id: %s interfaceName %s'% (self.endpoint_id, self.endpoint_interface_name)
 
 class ComputingManager(models.Model):
     manager_id = models.CharField(max_length=200, primary_key=True)
@@ -46,15 +45,24 @@ class ExecutionEnvironment(models.Model):
     entryUUID = models.CharField(max_length=200, default="")
     entity_name = models.CharField(max_length=200, default="")
 
+    def __str__(self):
+        return 'envId: %s virtual_memory_size: %s'% (self.resource_id, self.virtual_memory_size)
+
 
 class ComputingShareEndpoint(models.Model):
     computing_share_id = models.CharField(max_length=200, default="")
     computing_endpoint_id = models.CharField(max_length=200, default="")
 
+    def __str__(self):
+        return 'shareId: %s endpointId: %s'% (self.computing_share_id, self.computing_endpoint_id)
+
 
 class ComputingShareExecutionEnvironment(models.Model):
     share_id = models.CharField(max_length=200, default="")
     environment_id = models.CharField(max_length=200, default="")
+
+    def __str__(self):
+        return 'shareId: %s envId: %s'% (self.share_id, self.environment_id)
 
 
 class ComputingShare(models.Model):
@@ -63,6 +71,9 @@ class ComputingShare(models.Model):
     max_running_jobs = models.IntegerField(default=0)
     max_total_jobs = models.IntegerField(default=0)
     max_virtual_memory = models.IntegerField(default=0)
+
+    def __str__(self):
+        return 'shareId: %s memory: %s'% (self.share_id, self.max_virtual_memory)
 
 
 

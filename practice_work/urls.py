@@ -27,6 +27,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'interface/(?P<name>[\w.]+)', views.interface),
     url(r'interfaceinfo/(?P<name>[\w.]+)', views.interfaceinfo),
+    url(r'computingshare/(?P<name>[\w._:\d]+)', views.computingshare),
+    url(r'environment/(?P<name>[\w._:\d]+)', views.environment),
     path('', views.Home.as_view())
 ]
 

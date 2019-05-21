@@ -4,8 +4,13 @@ from django.shortcuts import render
 from django.views.generic.base import View
 import rrdtool
 from LdapScheduler.models import GridResourceEndpoint
+from LdapScheduler.models import ComputingShareEndpoint
+from LdapScheduler.models import ComputingShare
+from LdapScheduler.models import ComputingShareExecutionEnvironment
+from LdapScheduler.models import ExecutionEnvironment
 import tempfile
 import datetime
+import urllib.parse
 
 
 def interface(request, name=None):
@@ -30,7 +35,20 @@ def interface(request, name=None):
 
 def interfaceinfo(request, name=None):
     endpoint = GridResourceEndpoint.objects.get(endpoint_interface_name=name)
-    return render(request, "interfaceinfo.html", {'interface': endpoint})
+    shares = ComputingShareEndpoint.objects.filter(computing_endpoint_id=endpoint.endpoint_id)
+    return render(request, "interfaceinfo.html", {'interface': endpoint, 'shares': shares})
+
+
+def computingshare(request, name=None):
+    share = ComputingShare.objects.get(share_id=name)
+    environments = ComputingShareExecutionEnvironment.objects.filter(share_id=name)
+    return render(request, "computingshare.html", {'share': share, 'environments': environments})
+
+
+def environment(request, name=None):
+    print(name)
+    environment = ExecutionEnvironment.objects.get(resource_id=name)
+    return render(request, "environment.html", {'environment': environment})
 
 
 class Home(View):

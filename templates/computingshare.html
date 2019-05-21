@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Computing Share</title>
+</head>
+<body>
+<p>Max CPU Time: {{ share.max_cpu_time }}</p>
+<p>Max running jobs: {{ share.max_running_jobs }}</p>
+<p>Max total jobs: {{ share.max_total_jobs }}</p>
+<p>Max virtual memory: {{ share.max_virtual_memory }}</p>
+{% for environment in environments %}
+    <p>{{ environment.environment_id }}<p>
+    <a href="/environment/{{ environment.environment_id }}">{{ environment.environment_id }}</a>
+{% endfor %}
+</body>
+</html>
