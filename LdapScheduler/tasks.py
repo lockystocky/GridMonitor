@@ -25,7 +25,7 @@ rrdtool.create(
 
 print("created")
 
-@periodic_task(run_every=timedelta(seconds=10))
+@periodic_task(run_every=timedelta(days=10))
 def a():
 
     attributes = ["GLUE2EndpointID", "GLUE2EndpointURL", "GLUE2EndpointInterfaceName",
@@ -56,10 +56,93 @@ def a():
         if "GLUE2EndpointHealthState" in ldap_ee:
             endpoint.health_state = ldap_ee["GLUE2EndpointHealthState"][0].decode('utf-8')
 
+        if 'GLUE2ComputingEndpointRunningJobs' in ldap_ee:
+            endpoint.running_jobs_count = int(
+                (ldap_ee['GLUE2ComputingEndpointRunningJobs'][0]).decode('utf-8'))
+
+            name = endpoint.endpoint_interface_name + "_running_jobs_count_my.rrd"
+            print(name)
+            try:
+                rrdtool.create(
+                    name,
+                    "--start", "now",
+                    "--step", "60",
+                    "--no-overwrite",
+                    "DS:running_jobs:GAUGE:60:0:5000",
+                    "RRA:AVERAGE:0.5:1:500")
+
+            except:
+                print('db exists')
+
+            rrdtool.update(name, "N:" + str(endpoint.running_jobs_count))
+            print('updated')
+
+        if "GLUE2ComputingEndpointTotalJobs" in ldap_ee:
+            endpoint.total_jobs_count = int(ldap_ee["GLUE2ComputingEndpointTotalJobs"][0].decode('utf-8'))
+            name = endpoint.endpoint_interface_name + "_total_jobs_count_my.rrd"
+
+            try:
+                rrdtool.create(
+                    name,
+                    "--start", "now",
+                    "--step", "60",
+                    "--no-overwrite",
+                    "DS:total_jobs:GAUGE:60:0:5000",
+                    "RRA:AVERAGE:0.5:1:500")
+
+            except:
+                print('db exists')
+
+            rrdtool.update(name, "N:" + str(endpoint.total_jobs_count))
+
+        if "GLUE2ComputingEndpointStagingJobs" in ldap_ee:
+            endpoint.staging_jobs_count = int(
+                ldap_ee["GLUE2ComputingEndpointStagingJobs"][0].decode('utf-8'))
+            name = endpoint.endpoint_interface_name + "_staging_jobs_count_my.rrd"
+
+            try:
+                rrdtool.create(
+                    name,
+                    "--start", "now",
+                    "--step", "60",
+                    "--no-overwrite",
+                    "DS:staging_jobs:GAUGE:60:0:5000",
+                    "RRA:AVERAGE:0.5:1:500")
+
+            except:
+                print('db exists')
+
+            rrdtool.update(name, "N:" + str(endpoint.staging_jobs_count))
+
+        if "GLUE2ComputingEndpointWaitingJobs" in ldap_ee:
+            endpoint.waiting_jobs_count = int(
+                ldap_ee["GLUE2ComputingEndpointWaitingJobs"][0].decode('utf-8'))
+            name = endpoint.endpoint_interface_name + "_waiting_jobs_count_my.rrd"
+
+            try:
+                rrdtool.create(
+                    name,
+                    "--start", "now",
+                    "--step", "60",
+                    "--no-overwrite",
+                    "DS:waiting_jobs:GAUGE:60:0:5000",
+                    "RRA:AVERAGE:0.5:1:500")
+
+            except:
+                print('db exists')
+
+            rrdtool.update(name, "N:" + str(endpoint.waiting_jobs_count))
+
         endpoint.save()
 
     print('running periodic task')
 
+
+
+
+@periodic_task(run_every=timedelta(days=1))
+def b():
+    print('task B start')
     attributes = ["GLUE2ExecutionEnvironmentMainMemorySize", "GLUE2ExecutionEnvironmentOSFamily",
                   "GLUE2ExecutionEnvironmentPlatform", "GLUE2ExecutionEnvironmentCPUClockSpeed",
                   "GLUE2ExecutionEnvironmentCPUModel", "GLUE2ExecutionEnvironmentLogicalCPUs",
@@ -79,7 +162,8 @@ def a():
             exec_env.main_memory_size = int((ldap_ee['GLUE2ExecutionEnvironmentMainMemorySize'][0]).decode('utf-8'))
 
         if 'GLUE2ExecutionEnvironmentComputingManagerForeignKey' in ldap_ee:
-            exec_env.computing_manager_id = (ldap_ee['GLUE2ExecutionEnvironmentComputingManagerForeignKey'][0]).decode('utf-8')
+            exec_env.computing_manager_id = (ldap_ee['GLUE2ExecutionEnvironmentComputingManagerForeignKey'][0]).decode(
+                'utf-8')
 
         if 'GLUE2ExecutionEnvironmentOSFamily' in ldap_ee:
             exec_env.os_family = (ldap_ee['GLUE2ExecutionEnvironmentOSFamily'][0]).decode('utf-8')
@@ -97,7 +181,8 @@ def a():
             exec_env.logical_cpus_count = int((ldap_ee['GLUE2ExecutionEnvironmentLogicalCPUs'][0]).decode('utf-8'))
 
         if 'GLUE2ExecutionEnvironmentVirtualMemorySize' in ldap_ee:
-            exec_env.virtual_memory_size = int((ldap_ee['GLUE2ExecutionEnvironmentVirtualMemorySize'][0]).decode('utf-8'))
+            exec_env.virtual_memory_size = int(
+                (ldap_ee['GLUE2ExecutionEnvironmentVirtualMemorySize'][0]).decode('utf-8'))
 
         exec_env.save()
 
@@ -118,11 +203,13 @@ def a():
             manager.total_slots_count = int((ldap_ee['GLUE2ComputingManagerTotalSlots'][0]).decode('utf-8'))
 
         if 'GLUE2ComputingManagerSlotsUsedByLocalJobs' in ldap_ee:
-            manager.slots_used_by_local_jobs_count = int((ldap_ee['GLUE2ComputingManagerSlotsUsedByLocalJobs'][0]).decode(
-                'utf-8'))
+            manager.slots_used_by_local_jobs_count = int(
+                (ldap_ee['GLUE2ComputingManagerSlotsUsedByLocalJobs'][0]).decode(
+                    'utf-8'))
 
         if 'GLUE2ComputingManagerSlotsUsedByGridJobs' in ldap_ee:
-            manager.slots_used_by_grid_jobs_count = (ldap_ee['GLUE2ComputingManagerSlotsUsedByGridJobs'][0]).decode('utf-8')
+            manager.slots_used_by_grid_jobs_count = (ldap_ee['GLUE2ComputingManagerSlotsUsedByGridJobs'][0]).decode(
+                'utf-8')
 
         if 'GLUE2ManagerServiceForeignKey' in ldap_ee:
             manager.computing_service_id = (ldap_ee['GLUE2ManagerServiceForeignKey'][0]).decode('utf-8')
@@ -146,7 +233,8 @@ def a():
         if "GLUE2ComputingShareComputingEndpointForeignKey" in ldap_ee:
             for endpoint in ldap_ee["GLUE2ComputingShareComputingEndpointForeignKey"]:
                 endpoint_id = endpoint.decode('utf-8')
-                cse, created = ComputingShareEndpoint.objects.get_or_create(computing_share_id=share_id, computing_endpoint_id=endpoint_id)
+                cse, created = ComputingShareEndpoint.objects.get_or_create(computing_share_id=share_id,
+                                                                            computing_endpoint_id=endpoint_id)
                 cse.computing_share_id = share_id
                 cse.computing_endpoint_id = endpoint_id
                 cse.save()
@@ -154,7 +242,8 @@ def a():
         if "GLUE2ComputingShareExecutionEnvironmentForeignKey" in ldap_ee:
             for env in ldap_ee["GLUE2ComputingShareExecutionEnvironmentForeignKey"]:
                 environment_id = env.decode('utf-8')
-                cse, created = ComputingShareExecutionEnvironment.objects.get_or_create(share_id=share_id, environment_id=environment_id)
+                cse, created = ComputingShareExecutionEnvironment.objects.get_or_create(share_id=share_id,
+                                                                                        environment_id=environment_id)
                 cse.share_id = share_id
                 cse.environment_id = environment_id
                 cse.save()
@@ -173,6 +262,7 @@ def a():
 
         share.save()
 
+    print('task B stop')
 
 
 
