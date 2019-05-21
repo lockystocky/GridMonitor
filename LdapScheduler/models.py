@@ -47,6 +47,24 @@ class ExecutionEnvironment(models.Model):
     entity_name = models.CharField(max_length=200, default="")
 
 
+class ComputingShareEndpoint(models.Model):
+    computing_share_id = models.CharField(max_length=200, default="")
+    computing_endpoint_id = models.CharField(max_length=200, default="")
+
+
+class ComputingShareExecutionEnvironment(models.Model):
+    share_id = models.CharField(max_length=200, default="")
+    environment_id = models.CharField(max_length=200, default="")
+
+
+class ComputingShare(models.Model):
+    share_id = models.CharField(max_length=200, primary_key=True)
+    max_cpu_time = models.IntegerField(default=0)
+    max_running_jobs = models.IntegerField(default=0)
+    max_total_jobs = models.IntegerField(default=0)
+    max_virtual_memory = models.IntegerField(default=0)
+
+
 
 
 

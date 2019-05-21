@@ -6,7 +6,9 @@ import os
 from LdapScheduler.models import GridResourceEndpoint
 from LdapScheduler.models import ExecutionEnvironment
 from LdapScheduler.models import ComputingManager
-from LdapScheduler.models import ComputingService
+from LdapScheduler.models import ComputingShare
+from LdapScheduler.models import ComputingShareEndpoint
+from LdapScheduler.models import ComputingShareExecutionEnvironment
 import rrdtool
 
 #os.environ.setdefault("DJANGO_SETTINGS_MODULE", "practice_work.settings")
@@ -41,7 +43,6 @@ def a():
 
         endpoint_id = (ldap_ee['GLUE2EndpointID'][0]).decode('utf-8')
         endpoint, created = GridResourceEndpoint.objects.get_or_create(endpoint_id=endpoint_id)
-        #endpoint.record_time = datetime.datetime.now()
         endpoint.endpoint_url = ldap_ee['GLUE2EndpointURL'][0].decode('utf-8')
         endpoint.endpoint_interface_name = ldap_ee['GLUE2EndpointInterfaceName'][0].decode('utf-8')
         endpoint.entryUUID = ldap_ee['entryUUID'][0].decode('utf-8')
@@ -127,6 +128,50 @@ def a():
             manager.computing_service_id = (ldap_ee['GLUE2ManagerServiceForeignKey'][0]).decode('utf-8')
 
         exec_env.save()
+
+    attributes = ["GLUE2ShareID", "GLUE2ComputingShareComputingEndpointForeignKey",
+                  "GLUE2ComputingShareMaxCPUTime", "GLUE2ComputingShareMaxRunningJobs",
+                  "GLUE2ComputingShareMaxTotalJobs", "GLUE2ComputingShareMaxVirtualMemory",
+                  "GLUE2ComputingShareExecutionEnvironmentForeignKey"]
+
+    connection = ldap.initialize("ldap://arc.univ.kiev.ua:2135")
+    ldap_endpoints_list = connection.search_s("o=glue", ldap.SCOPE_SUBTREE, "(objectClass=GLUE2ComputingShare)",
+                                              attributes)
+
+    for ldap_dn, ldap_ee in ldap_endpoints_list:
+
+        share_id = (ldap_ee['GLUE2ShareID'][0]).decode('utf-8')
+        share, created = ComputingShare.objects.get_or_create(share_id=share_id)
+
+        if "GLUE2ComputingShareComputingEndpointForeignKey" in ldap_ee:
+            for endpoint in ldap_ee["GLUE2ComputingShareComputingEndpointForeignKey"]:
+                endpoint_id = endpoint.decode('utf-8')
+                cse, created = ComputingShareEndpoint.objects.get_or_create(computing_share_id=share_id, computing_endpoint_id=endpoint_id)
+                cse.computing_share_id = share_id
+                cse.computing_endpoint_id = endpoint_id
+                cse.save()
+
+        if "GLUE2ComputingShareExecutionEnvironmentForeignKey" in ldap_ee:
+            for env in ldap_ee["GLUE2ComputingShareExecutionEnvironmentForeignKey"]:
+                environment_id = env.decode('utf-8')
+                cse, created = ComputingShareExecutionEnvironment.objects.get_or_create(share_id=share_id, environment_id=environment_id)
+                cse.share_id = share_id
+                cse.environment_id = environment_id
+                cse.save()
+
+        if "GLUE2ComputingShareMaxCPUTime" in ldap_ee:
+            share.max_cpu_time = int((ldap_ee['GLUE2ComputingShareMaxCPUTime'][0]).decode('utf-8'))
+
+        if "GLUE2ComputingShareMaxRunningJobs" in ldap_ee:
+            share.max_running_jobs = int((ldap_ee['GLUE2ComputingShareMaxRunningJobs'][0]).decode('utf-8'))
+
+        if "GLUE2ComputingShareMaxTotalJobs" in ldap_ee:
+            share.max_total_jobs = int((ldap_ee['GLUE2ComputingShareMaxTotalJobs'][0]).decode('utf-8'))
+
+        if "GLUE2ComputingShareMaxVirtualMemory" in ldap_ee:
+            share.max_virtual_memory = int((ldap_ee['GLUE2ComputingShareMaxVirtualMemory'][0]).decode('utf-8'))
+
+        share.save()
 
 
 
