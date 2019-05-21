@@ -8,6 +8,12 @@
 <p>{{ path }}</p>
 {% load staticfiles %}
 
-<img src="{% static path %}" />
+<img src="{% static total_jobs_path %}" />
+<br/>
+<img src="{% static running_jobs_path %}" />
+<br/>
+<img src="{% static waiting_jobs_path %}" />
+<br/>
+<img src="{% static staging_jobs_path %}" />
 </body>
 </html>
