@@ -11,7 +11,7 @@
     <li>{{ endpoint.endpoint_interface_name}}</li>
       <p>{{ endpoint.endpoint_id }}</p>
       <a href="/interface/{{ endpoint.endpoint_interface_name }}">Statistics</a>
-      <a href="/interfaceinfo/{{ endpoint.endpoint_interface_name }}">Interface information</a>
+      <a href="/interfaceinfo/{{ endpoint.base64id }}">Interface information</a>
   {% endfor %}
 </ul>
 </body>
