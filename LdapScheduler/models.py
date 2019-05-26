@@ -12,17 +12,14 @@ class GridResourceEndpoint (models.Model):
     computing_service_id = models.CharField(max_length=200, default="")
     endpoint_url = models.CharField(max_length=200)
     endpoint_interface_name = models.CharField(max_length=200)
-    running_jobs_count = models.IntegerField(default=0)
-    total_jobs_count = models.IntegerField(default=0)
-    waiting_jobs_count = models.IntegerField(default=0)
-    staging_jobs_count = models.IntegerField(default=0)
-    suspended_jobs_count = models.IntegerField(default=0)
     quality_level = models.CharField(max_length=200)
     health_state = models.CharField(max_length=200)
     record_time = models.DateTimeField(null=True)
+    base64id = models.CharField(max_length=200, default="")
 
     def __str__(self):
         return 'id: %s interfaceName %s'% (self.endpoint_id, self.endpoint_interface_name)
+
 
 class ComputingManager(models.Model):
     manager_id = models.CharField(max_length=200, primary_key=True)

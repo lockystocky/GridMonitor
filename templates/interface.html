@@ -7,13 +7,23 @@
 <body>
 <p>{{ path }}</p>
 {% load staticfiles %}
-
-<img src="{% static total_jobs_path %}" />
+{% if total_jobs_path %}
+    <img src="{% static total_jobs_path %}" />
 <br/>
-<img src="{% static running_jobs_path %}" />
+{% endif %}
+{% if running_jobs_path %}
+    <img src="{% static running_jobs_path %}" />
 <br/>
-<img src="{% static waiting_jobs_path %}" />
+{% endif %}
+{% if waiting_jobs_path %}
+    <img src="{% static waiting_jobs_path %}" />
 <br/>
-<img src="{% static staging_jobs_path %}" />
-</body>
-</html>
+{% endif %}
+{% if staging_jobs_path %}
+    <img src="{% static staging_jobs_path %}" />
+<br/>
+{% endif %}
+{% if suspended_jobs_path %}
+    <img src="{% static suspended_jobs_path %}" />
+<br/>
+{% endif %}

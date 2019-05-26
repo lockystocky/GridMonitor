@@ -10,6 +10,7 @@ from LdapScheduler.models import ComputingShare
 from LdapScheduler.models import ComputingShareEndpoint
 from LdapScheduler.models import ComputingShareExecutionEnvironment
 import rrdtool
+import base64
 
 #os.environ.setdefault("DJANGO_SETTINGS_MODULE", "practice_work.settings")
 
@@ -25,7 +26,7 @@ rrdtool.create(
 
 print("created")
 
-@periodic_task(run_every=timedelta(days=10))
+@periodic_task(run_every=timedelta(seconds=10))
 def a():
 
     attributes = ["GLUE2EndpointID", "GLUE2EndpointURL", "GLUE2EndpointInterfaceName",
@@ -40,15 +41,23 @@ def a():
     for ldap_dn, ldap_ee in ldap_endpoints_list:
         if 'GLUE2EndpointURL' not in ldap_ee:
             continue
+        print('---------------------------')
+        for ce in ldap_ee['GLUE2EndpointID']:
+            print(ce.decode('utf-8'))
+        print('----------------------------')
 
         endpoint_id = (ldap_ee['GLUE2EndpointID'][0]).decode('utf-8')
         endpoint, created = GridResourceEndpoint.objects.get_or_create(endpoint_id=endpoint_id)
         endpoint.endpoint_url = ldap_ee['GLUE2EndpointURL'][0].decode('utf-8')
         endpoint.endpoint_interface_name = ldap_ee['GLUE2EndpointInterfaceName'][0].decode('utf-8')
         endpoint.entryUUID = ldap_ee['entryUUID'][0].decode('utf-8')
+        end_id_base64 = base64.b64encode(endpoint.endpoint_id.encode('ascii')).decode('ascii')
+        print('base64: ' + end_id_base64)
+        endpoint.base64id = end_id_base64
+        print('endpoint: ' + endpoint.endpoint_id)
 
-        if "GLUE2ComputingEndpointSuspendedJobs" in ldap_ee:
-            endpoint.suspended_jobs_count = int(ldap_ee["GLUE2ComputingEndpointSuspendedJobs"][0].decode('utf-8'))
+        #if "GLUE2ComputingEndpointSuspendedJobs" in ldap_ee:
+        #    endpoint.suspended_jobs_count = int(ldap_ee["GLUE2ComputingEndpointSuspendedJobs"][0].decode('utf-8'))
 
         if "GLUE2EndpointQualityLevel" in ldap_ee:
             endpoint.quality_level = ldap_ee["GLUE2EndpointQualityLevel"][0].decode('utf-8')
@@ -57,10 +66,10 @@ def a():
             endpoint.health_state = ldap_ee["GLUE2EndpointHealthState"][0].decode('utf-8')
 
         if 'GLUE2ComputingEndpointRunningJobs' in ldap_ee:
-            endpoint.running_jobs_count = int(
+            running_jobs_count = int(
                 (ldap_ee['GLUE2ComputingEndpointRunningJobs'][0]).decode('utf-8'))
 
-            name = endpoint.endpoint_interface_name + "_running_jobs_count_my.rrd"
+            name = end_id_base64 + "_running_jobs_count.rrd"
             print(name)
             try:
                 rrdtool.create(
@@ -74,12 +83,12 @@ def a():
             except:
                 print('db exists')
 
-            rrdtool.update(name, "N:" + str(endpoint.running_jobs_count))
-            print('updated')
+            rrdtool.update(name, "N:" + str(running_jobs_count))
+            print('running: ' + str(running_jobs_count))
 
         if "GLUE2ComputingEndpointTotalJobs" in ldap_ee:
-            endpoint.total_jobs_count = int(ldap_ee["GLUE2ComputingEndpointTotalJobs"][0].decode('utf-8'))
-            name = endpoint.endpoint_interface_name + "_total_jobs_count_my.rrd"
+            total_jobs_count = int(ldap_ee["GLUE2ComputingEndpointTotalJobs"][0].decode('utf-8'))
+            name = end_id_base64 + "_total_jobs_count.rrd"
 
             try:
                 rrdtool.create(
@@ -93,12 +102,13 @@ def a():
             except:
                 print('db exists')
 
-            rrdtool.update(name, "N:" + str(endpoint.total_jobs_count))
+            rrdtool.update(name, "N:" + str(total_jobs_count))
+            print('total: ' + str(total_jobs_count))
 
         if "GLUE2ComputingEndpointStagingJobs" in ldap_ee:
-            endpoint.staging_jobs_count = int(
+            staging_jobs_count = int(
                 ldap_ee["GLUE2ComputingEndpointStagingJobs"][0].decode('utf-8'))
-            name = endpoint.endpoint_interface_name + "_staging_jobs_count_my.rrd"
+            name = end_id_base64 + "_staging_jobs_count.rrd"
 
             try:
                 rrdtool.create(
@@ -112,12 +122,13 @@ def a():
             except:
                 print('db exists')
 
-            rrdtool.update(name, "N:" + str(endpoint.staging_jobs_count))
+            rrdtool.update(name, "N:" + str(staging_jobs_count))
+            print('staging: ' + str(staging_jobs_count))
 
         if "GLUE2ComputingEndpointWaitingJobs" in ldap_ee:
-            endpoint.waiting_jobs_count = int(
+            waiting_jobs_count = int(
                 ldap_ee["GLUE2ComputingEndpointWaitingJobs"][0].decode('utf-8'))
-            name = endpoint.endpoint_interface_name + "_waiting_jobs_count_my.rrd"
+            name = end_id_base64 + "_waiting_jobs_count.rrd"
 
             try:
                 rrdtool.create(
@@ -131,7 +142,27 @@ def a():
             except:
                 print('db exists')
 
-            rrdtool.update(name, "N:" + str(endpoint.waiting_jobs_count))
+            rrdtool.update(name, "N:" + str(waiting_jobs_count))
+            print('waiting: ' + str(waiting_jobs_count))
+
+        if "GLUE2ComputingEndpointSuspendedJobs" in ldap_ee:
+            suspended_jobs_count = int(ldap_ee["GLUE2ComputingEndpointSuspendedJobs"][0].decode('utf-8'))
+            name = end_id_base64 + "_suspended_jobs_count.rrd"
+
+            try:
+                rrdtool.create(
+                   name,
+                   "--start", "now",
+                   "--step", "60",
+                   "--no-overwrite",
+                   "DS:suspended_jobs:GAUGE:60:0:5000",
+                   "RRA:AVERAGE:0.5:1:500")
+
+            except:
+                print('db exists')
+
+            rrdtool.update(name, "N:" + str(suspended_jobs_count))
+            print('suspended: ' + str(suspended_jobs_count))
 
         endpoint.save()
 

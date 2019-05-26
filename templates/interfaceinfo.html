@@ -8,6 +8,7 @@
 <p>Interface name: {{ interface.endpoint_interface_name}}</p>
 <p>Endpoint Id: {{ interface.endpoint_id}}</p>
 <p>Endpoint Url: {{ interface.endpoint_url}}</p>
+
 {% for share in shares %}
     <p>{{ share.computing_share_id }}<p>
      <a href="/computingshare/{{ share.computing_share_id }}">{{ share.computing_share_id }}</a>
