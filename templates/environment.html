@@ -156,7 +156,7 @@ $(function(){
     </div>
     </br>
 
-    {% if suspended_jobs_path or total_jobs_path or running_jobs_path or staging_jobs_path or waiting_jobs_path %}
+    {% if total_instances_path or unavail_instances_path or used_instances_path %}
         <div class="row">
             <div class="col-md-11 col-lg-11">
                 <div class="tl-wrapper">
@@ -168,28 +168,18 @@ $(function(){
                             </div>
                         </div>
                          <div class="tl-more no-display" >
-                             {% if total_jobs_path %}
-                                 <img class="load-image" src="{% static total_jobs_path %}" />
+                             {% if total_instances_path %}
+                                 <img class="load-image" src="{% static total_instances_path %}" />
                                 <br/>
                                  <br/>
                              {% endif %}
-                             {% if running_jobs_path %}
-                                 <img class="load-image" src="{% static running_jobs_path %}" />
+                             {% if unavail_instances_path %}
+                                 <img class="load-image" src="{% static unavail_instances_path %}" />
                                  <br/>
                                  <br/>
                              {% endif %}
-                             {% if waiting_jobs_path %}
-                                 <img class="load-image" src="{% static waiting_jobs_path %}" />
-                                 <br/>
-                                 <br/>
-                             {% endif %}
-                             {% if staging_jobs_path %}
-                                 <img class="load-image" src="{% static staging_jobs_path %}" />
-                                 <br/>
-                                 <br/>
-                             {% endif %}
-                             {% if suspended_jobs_path %}
-                                 <img class="load-image" src="{% static suspended_jobs_path %}" />
+                             {% if used_instances_path %}
+                                 <img class="load-image" src="{% static used_instances_path %}" />
                                  <br/>
                                  <br/>
                              {% endif %}

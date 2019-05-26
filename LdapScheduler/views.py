@@ -215,15 +215,135 @@ def interfaceinfo(request, name=None):
 
 
 def computingshare(request, name=None):
+    print('NAME: ' + name)
     share = ComputingShare.objects.get(share_id=name)
+    print('SHARE_ID: ' + share.share_id)
+    print('SHARE_BASE64_ID: ' + share.base64id)
     environments = ComputingShareExecutionEnvironment.objects.filter(share_id=name)
-    return render(request, "computingshare.html", {'share': share, 'environments': environments})
+
+    total_jobs_name = share.base64id + '_total_jobs.rrd'
+    total_jobs_path = share.base64id + '_total_jobs' + str(datetime.datetime.now().date()) + '.png'
+    print('total_jobs_name: ' + total_jobs_name)
+
+    rrdtool.graph('practice_work/files/static/' + total_jobs_path,
+                  '--imgformat', 'PNG',
+                  '--width', '540',
+                  '--height', '100',
+                  '--start', "-14400",
+                  '--end', "now",
+                  '--vertical-label', 'Total jobs',
+                  '--title', 'Total jobs',
+                  '--lower-limit', '0',
+                  'DEF:tot_jobs=' + total_jobs_name + ':tot_jobs:AVERAGE',
+                  'AREA:tot_jobs#990033:Total jobs')
+
+    waiting_jobs_name = share.base64id + '_waiting_jobs.rrd'
+    waiting_jobs_path = share.base64id + '_waiting_jobs' + str(datetime.datetime.now().date()) + '.png'
+
+    try:
+        rrdtool.graph('practice_work/files/static/' + waiting_jobs_path,
+                      '--imgformat', 'PNG',
+                      '--width', '540',
+                      '--height', '100',
+                      '--start', "-14400",
+                      '--end', "now",
+                      '--vertical-label', 'Waiting jobs',
+                      '--title', 'Waiting jobs',
+                      '--lower-limit', '0',
+                      'DEF:waiting_jobs=' + waiting_jobs_name + ':waiting_jobs:AVERAGE',
+                      'AREA:waiting_jobs#990033:Waiting jobs')
+    except:
+        waiting_jobs_path = ""
+
+    running_jobs_name = share.base64id + '_running_jobs.rrd'
+    running_jobs_path = share.base64id + '_running_jobs' + str(datetime.datetime.now().date()) + '.png'
+
+    try:
+        rrdtool.graph('practice_work/files/static/' + running_jobs_path,
+                      '--imgformat', 'PNG',
+                      '--width', '540',
+                      '--height', '100',
+                      '--start', "-14400",
+                      '--end', "now",
+                      '--vertical-label', 'Running jobs',
+                      '--title', 'Running jobs',
+                      '--lower-limit', '0',
+                      'DEF:running_jobs=' + running_jobs_name + ':running_jobs:AVERAGE',
+                      'AREA:running_jobs#990033:Total jobs')
+    except:
+        running_jobs_path = ""
+
+    return render(request, "computingshare.html",
+                  {'share': share, 'environments': environments,
+                   'total_jobs_path': total_jobs_path,
+                   'running_jobs_path': running_jobs_path,
+                   'waiting_jobs_path': waiting_jobs_path})
 
 
 def environment(request, name=None):
     print(name)
     environment = ExecutionEnvironment.objects.get(resource_id=name)
-    return render(request, "environment.html", {'environment': environment})
+
+    used_instances_name = environment.base64id + '_used_instances.rrd'
+    used_instances_path = environment.base64id + '_used_instances' + str(datetime.datetime.now().date()) + '.png'
+
+    try:
+        rrdtool.graph('practice_work/files/static/' + used_instances_path,
+                      '--imgformat', 'PNG',
+                      '--width', '540',
+                      '--height', '100',
+                      '--start', "-14400",
+                      '--end', "now",
+                      '--vertical-label', 'Used instances',
+                      '--title', 'Used instances',
+                      '--lower-limit', '0',
+                      'DEF:used_instances=' + used_instances_name + ':used_instances:AVERAGE',
+                      'AREA:used_instances#990033:Total jobs')
+    except:
+        used_instances_path = ""
+
+    unavail_instances_name = environment.base64id + '_unavailable_instances.rrd'
+    unavail_instances_path = environment.base64id + '_unavailable_instances' + str(datetime.datetime.now().date()) + '.png'
+
+    try:
+        rrdtool.graph('practice_work/files/static/' + unavail_instances_path,
+                      '--imgformat', 'PNG',
+                      '--width', '540',
+                      '--height', '100',
+                      '--start', "-14400",
+                      '--end', "now",
+                      '--vertical-label', 'Unavailable instances',
+                      '--title', 'Unavailable instances',
+                      '--lower-limit', '0',
+                      'DEF:unavail_inst=' + unavail_instances_name + ':unavail_inst:AVERAGE',
+                      'AREA:unavail_inst#990033:Unavailable instances')
+    except:
+        unavail_instances_path = ""
+
+    total_instances_name = environment.base64id + '_total_instances.rrd'
+    total_instances_path = environment.base64id + '_total_instances' + str(
+        datetime.datetime.now().date()) + '.png'
+
+    try:
+        rrdtool.graph('practice_work/files/static/' + total_instances_path,
+                      '--imgformat', 'PNG',
+                      '--width', '540',
+                      '--height', '100',
+                      '--start', "-14400",
+                      '--end', "now",
+                      '--vertical-label', 'Total instances',
+                      '--title', 'Total instances',
+                      '--lower-limit', '0',
+                      'DEF:total_instances=' + total_instances_name + ':total_instances:AVERAGE',
+                      'AREA:total_instances#990033:Total instances')
+    except:
+        total_instances_path = ""
+
+    return render(request, "environment.html",
+                  {'environment': environment,
+                   'total_instances_path': total_instances_path,
+                   'unavail_instances_path': unavail_instances_path,
+                   'used_instances_path': used_instances_path})
 
 
 class Home(View):

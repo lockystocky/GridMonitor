@@ -26,7 +26,7 @@ rrdtool.create(
 
 print("created")
 
-@periodic_task(run_every=timedelta(seconds=10))
+@periodic_task(run_every=timedelta(days=10))
 def a():
 
     attributes = ["GLUE2EndpointID", "GLUE2EndpointURL", "GLUE2EndpointInterfaceName",
@@ -169,9 +169,167 @@ def a():
     print('running periodic task')
 
 
+@periodic_task(run_every=timedelta(seconds=10))
+def c():
+
+    attributes = ["GLUE2ExecutionEnvironmentTotalInstances", "GLUE2ExecutionEnvironmentUnavailableInstances",
+                  "GLUE2ExecutionEnvironmentUsedInstances",
+                  "GLUE2ResourceID"]
+
+    connection = ldap.initialize("ldap://arc.univ.kiev.ua:2135")
+    ldap_endpoints_list = connection.search_s("o=glue", ldap.SCOPE_SUBTREE, "(objectClass=GLUE2ExecutionEnvironment)", attributes)
+
+    for ldap_dn, ldap_ee in ldap_endpoints_list:
+
+        env_id = (ldap_ee['GLUE2ResourceID'][0]).decode('utf-8')
+        env, created = ExecutionEnvironment.objects.get_or_create(resource_id=env_id)
+        id_base64 = base64.b64encode(env.resource_id.encode('ascii')).decode('ascii')
+        env.base64id = id_base64
+
+        if "GLUE2ExecutionEnvironmentTotalInstances" in ldap_ee:
+            total_instances = int(ldap_ee["GLUE2ExecutionEnvironmentTotalInstances"][0].decode('utf-8'))
+
+            name = id_base64 + "_total_instances.rrd"
+            print(name)
+            try:
+                rrdtool.create(
+                    name,
+                    "--start", "now",
+                    "--step", "60",
+                    "--no-overwrite",
+                    "DS:total_instances:GAUGE:60:0:5000",
+                    "RRA:AVERAGE:0.5:1:500")
+
+            except:
+                print('db exists')
+
+            rrdtool.update(name, "N:" + str(total_instances))
+
+        if "GLUE2ExecutionEnvironmentUnavailableInstances" in ldap_ee:
+            unavailable_instances = int(ldap_ee["GLUE2ExecutionEnvironmentUnavailableInstances"][0].decode('utf-8'))
+
+            name = id_base64 + "_unavailable_instances.rrd"
+            print(name)
+            try:
+                rrdtool.create(
+                    name,
+                    "--start", "now",
+                    "--step", "60",
+                    "--no-overwrite",
+                    "DS:unavail_inst:GAUGE:60:0:5000",
+                    "RRA:AVERAGE:0.5:1:500")
+
+            except:
+                print('db exists')
+
+            rrdtool.update(name, "N:" + str(unavailable_instances))
+
+        if "GLUE2ExecutionEnvironmentUsedInstances" in ldap_ee:
+            used_instances = int(ldap_ee["GLUE2ExecutionEnvironmentUsedInstances"][0].decode('utf-8'))
+
+            name = id_base64 + "_used_instances.rrd"
+            print(name)
+            try:
+                rrdtool.create(
+                    name,
+                    "--start", "now",
+                    "--step", "60",
+                    "--no-overwrite",
+                    "DS:used_instances:GAUGE:60:0:5000",
+                    "RRA:AVERAGE:0.5:1:500")
+
+            except:
+                print('db exists')
+
+            rrdtool.update(name, "N:" + str(used_instances))
+
+        env.save()
+
+    print('EXECUTION_ENVIRONMENT!!!!!!!!')
 
 
-@periodic_task(run_every=timedelta(days=1))
+@periodic_task(run_every=timedelta(seconds=10))
+def d():
+
+    attributes = ["GLUE2ShareID", "GLUE2ComputingShareTotalJobs",
+                  "GLUE2ComputingShareWaitingJobs",
+                  "GLUE2ComputingShareRunningJobs"]
+
+    connection = ldap.initialize("ldap://arc.univ.kiev.ua:2135")
+    ldap_endpoints_list = connection.search_s("o=glue", ldap.SCOPE_SUBTREE, "(objectClass=GLUE2ComputingShare)", attributes)
+
+    for ldap_dn, ldap_ee in ldap_endpoints_list:
+
+        share_id = (ldap_ee['GLUE2ShareID'][0]).decode('utf-8')
+        print('NAME: ' + share_id)
+        share, created = ComputingShare.objects.get_or_create(share_id=share_id)
+        id_base64 = base64.b64encode(share.share_id.encode('ascii')).decode('ascii')
+        share.base64id = id_base64
+
+        if "GLUE2ComputingShareTotalJobs" in ldap_ee:
+            total_jobs = int(ldap_ee["GLUE2ComputingShareTotalJobs"][0].decode('utf-8'))
+
+            name = id_base64 + "_total_jobs.rrd"
+            print(name)
+            try:
+                rrdtool.create(
+                    name,
+                    "--start", "now",
+                    "--step", "60",
+                    "--no-overwrite",
+                    "DS:tot_jobs:GAUGE:60:0:5000",
+                    "RRA:AVERAGE:0.5:1:500")
+
+            except:
+                print('db exists')
+
+            rrdtool.update(name, "N:" + str(total_jobs))
+            print('TOTAL JOBS: ' + str(total_jobs))
+
+        if "GLUE2ComputingShareWaitingJobs" in ldap_ee:
+            waiting_jobs = int(ldap_ee["GLUE2ComputingShareWaitingJobs"][0].decode('utf-8'))
+
+            name = id_base64 + "_waiting_jobs.rrd"
+            print(name)
+            try:
+                rrdtool.create(
+                    name,
+                    "--start", "now",
+                    "--step", "60",
+                    "--no-overwrite",
+                    "DS:waiting_jobs:GAUGE:60:0:5000",
+                    "RRA:AVERAGE:0.5:1:500")
+
+            except:
+                print('db exists')
+
+            rrdtool.update(name, "N:" + str(waiting_jobs))
+
+        if "GLUE2ComputingShareRunningJobs" in ldap_ee:
+            running_jobs = int(ldap_ee["GLUE2ComputingShareRunningJobs"][0].decode('utf-8'))
+
+            name = id_base64 + "_running_jobs.rrd"
+            print(name)
+            try:
+                rrdtool.create(
+                    name,
+                    "--start", "now",
+                    "--step", "60",
+                    "--no-overwrite",
+                    "DS:running_jobs:GAUGE:60:0:5000",
+                    "RRA:AVERAGE:0.5:1:500")
+
+            except:
+                print('db exists')
+
+            rrdtool.update(name, "N:" + str(running_jobs))
+
+        share.save()
+
+    print('COMPUTING SHARE!!!!!!!')
+
+
+@periodic_task(run_every=timedelta(seconds=10))
 def b():
     print('task B start')
     attributes = ["GLUE2ExecutionEnvironmentMainMemorySize", "GLUE2ExecutionEnvironmentOSFamily",

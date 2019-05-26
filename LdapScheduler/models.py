@@ -41,6 +41,7 @@ class ExecutionEnvironment(models.Model):
     virtual_memory_size = models.IntegerField(default=0)
     entryUUID = models.CharField(max_length=200, default="")
     entity_name = models.CharField(max_length=200, default="")
+    base64id = models.CharField(max_length=200, default="")
 
     def __str__(self):
         return 'envId: %s virtual_memory_size: %s'% (self.resource_id, self.virtual_memory_size)
@@ -68,6 +69,7 @@ class ComputingShare(models.Model):
     max_running_jobs = models.IntegerField(default=0)
     max_total_jobs = models.IntegerField(default=0)
     max_virtual_memory = models.IntegerField(default=0)
+    base64id = models.CharField(max_length=200, default="")
 
     def __str__(self):
         return 'shareId: %s memory: %s'% (self.share_id, self.max_virtual_memory)
