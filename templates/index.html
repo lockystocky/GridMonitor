@@ -2,17 +2,131 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Grid monitor</title>
+    <title>Grid Monitor</title>
+     <link href="https://fonts.googleapis.com/css?family=Didact+Gothic|Montserrat:300,400,500,700&amp;subset=cyrillic-ext" rel="stylesheet" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
-<h2>Grid Monitor</h2>
-<ul>
-  {% for endpoint in endpoints %}
-    <li>{{ endpoint.endpoint_interface_name}}</li>
-      <p>{{ endpoint.endpoint_id }}</p>
-      <a href="/interface/{{ endpoint.endpoint_interface_name }}">Statistics</a>
-      <a href="/interfaceinfo/{{ endpoint.base64id }}">Interface information</a>
-  {% endfor %}
-</ul>
+<style>
+    .tl-wrapper {
+    padding: 7px 12px;
+    margin: 0;
+    position: relative;
+}
+
+    .tl-inner {
+    box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+    border: 1px solid #eee;
+    transition: .3s ease-out;
+}
+
+    .tl-inner:hover {
+        box-shadow: none;
+        transition: .3s ease-out;
+    }
+    .tl-main {
+    padding-bottom: 10px;
+}
+    .tl-more-btn {
+    width: 100%;
+    text-align: center;
+    left: 0;
+    bottom: 0;
+    padding: 0;
+    border: 1px solid #eee;
+    background: #f8f8f8;
+    transition: .2s ease-in-out;
+    color: #888;
+    font-size: 17px;
+}
+
+    .tl-more-btn:hover {
+        background: #f0f0f0;
+        transition: .2s ease-in-out;
+    }
+    .tl-status {
+    position: absolute;
+    width: 80px;
+    top: 0;
+    left: 0;
+    height: 100%;
+}
+    .tl-title {
+        margin: 10px 0;
+        font-size: 20px;
+        left: 0 !important;
+        right: 0;
+        width: 100% !important;
+        text-align:center;
+    }
+    .no-display{
+        display: none;
+    }
+    .load-image{
+         display: block;
+         margin-left: auto;
+         margin-right: auto;
+    }
+    .module {
+        margin-left: 50px;
+    }
+    .module.completed {
+            margin-top: 17px;
+        }
+    .mod-title {
+    display: block;
+    font-size: 14px;
+    font-weight: 100;
+    color: #673AB7;
+    margin-left: 50px;
+
+}
+    .mod-type {
+    float: left;
+    margin-left: 25px;
+}
+</style>
+
+<div class="row">
+    <div class="col-md-2 col-lg-2">
+
+    </div>
+    <div class="col-md-8 col-lg-8">
+
+         <div class="row">
+            <div class="col-md-11 col-lg-11">
+                <div style="text-align: center">
+                    <h2>Grid Monitor</h2>
+                </div>
+            <div style="margin-left: 15px">
+                <h3>Computing endpoints:</h3>
+            </div>
+
+                {% for endpoint in endpoints %}
+                <div class="tl-wrapper">
+                    <div class="tl-inner">
+                        <div class="tl-status"></div>
+                        <div class="tl-main">
+                            <div class="module completed">
+                                <div class="mod-type">
+                                       <i class="fas fa-cog"></i>
+                                </div>
+                                <div class="mod-title">
+                                    <a href="/interfaceinfo/{{ endpoint.base64id }}">{{ endpoint.endpoint_interface_name }}</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-lg-2"></div>
+</div>
+
 </body>
 </html>
