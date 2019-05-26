@@ -3,15 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <title>Computing Share</title>
+     <link href="https://fonts.googleapis.com/css?family=Didact+Gothic|Montserrat:300,400,500,700&amp;subset=cyrillic-ext" rel="stylesheet" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
-<p>Max CPU Time: {{ share.max_cpu_time }}</p>
-<p>Max running jobs: {{ share.max_running_jobs }}</p>
-<p>Max total jobs: {{ share.max_total_jobs }}</p>
-<p>Max virtual memory: {{ share.max_virtual_memory }}</p>
-{% for environment in environments %}
-    <p>{{ environment.environment_id }}<p>
-    <a href="/environment/{{ environment.environment_id }}">{{ environment.environment_id }}</a>
-{% endfor %}
+<style>
+    .tl-wrapper {
+    padding: 7px 12px;
+    margin: 0;
+    position: relative;
+}
+
+    .tl-inner {
+    box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+    border: 1px solid #eee;
+    transition: .3s ease-out;
+}
+
+    .tl-inner:hover {
+        box-shadow: none;
+        transition: .3s ease-out;
+    }
+    .tl-main {
+    padding-bottom: 10px;
+}
+    .tl-more-btn {
+    width: 100%;
+    text-align: center;
+    left: 0;
+    bottom: 0;
+    padding: 0;
+    border: 1px solid #eee;
+    background: #f8f8f8;
+    transition: .2s ease-in-out;
+    color: #888;
+    font-size: 17px;
+}
+
+    .tl-more-btn:hover {
+        background: #f0f0f0;
+        transition: .2s ease-in-out;
+    }
+    .tl-status {
+    position: absolute;
+    width: 80px;
+    top: 0;
+    left: 0;
+    height: 100%;
+}
+    .tl-title {
+        margin: 10px 0;
+        font-size: 20px;
+        left: 0 !important;
+        right: 0;
+        width: 100% !important;
+        text-align:center;
+    }
+    .no-display{
+        display: none;
+    }
+    .load-image{
+         display: block;
+         margin-left: auto;
+         margin-right: auto;
+    }
+    .module {
+        margin-left: 50px;
+    }
+    .module.completed {
+            margin-top: 17px;
+        }
+    .mod-title {
+    display: block;
+    font-size: 14px;
+    font-weight: 100;
+    color: #673AB7;
+    margin-left: 30px;
+}
+    .mod-type {
+    float: left;
+    left: 5px;
+}
+</style>
+<script>
+$(function(){
+    $('.tl-more-btn').click(
+        function(){
+            $(this).children('.fa').toggleClass('fa-chevron-down').toggleClass('fa-chevron-up');
+            $(this).siblings('.tl-more').toggleClass('no-display');
+        }
+    );
+});
+</script>
+{% load staticfiles %}
+</br>
+</br>
+<div class="row">
+    <div class="col-md-2 col-lg-2"></div>
+    <div class="col-md-8 col-lg-8">
+    <div style="margin-left: 15px">
+        <p>Computing share id: {{ share.share_id }}</p>
+        <div class="module completed">
+            <div class="mod-type">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+             <div class="mod-title">
+                 Max CPU Time: {{ share.max_cpu_time }}
+             </div>
+        </div>
+        <div class="module completed">
+            <div class="mod-type">
+                <i class="fas fa-spinner"></i>
+            </div>
+             <div class="mod-title">
+                 Max running jobs: {{ share.max_running_jobs }}
+             </div>
+        </div>
+        <div class="module completed">
+            <div class="mod-type">
+                <i class="fas fa-calculator"></i>
+            </div>
+             <div class="mod-title">
+                 Max total jobs: {{ share.max_total_jobs }}
+             </div>
+        </div>
+        <div class="module completed">
+            <div class="mod-type">
+                <i class="fas fa-memory"></i>
+            </div>
+             <div class="mod-title">
+                 Max virtual memory: {{ share.max_virtual_memory }}
+             </div>
+        </div>
+    </div>
+    </br>
+
+    {% if suspended_jobs_path or total_jobs_path or running_jobs_path or staging_jobs_path or waiting_jobs_path %}
+        <div class="row">
+            <div class="col-md-11 col-lg-11">
+                <div class="tl-wrapper">
+                    <div class="tl-inner">
+                        <div class="tl-status"></div>
+                        <div class="tl-main">
+                            <div class="tl-title">
+                            Loading information
+                            </div>
+                        </div>
+                         <div class="tl-more no-display" >
+                             {% if total_jobs_path %}
+                                 <img class="load-image" src="{% static total_jobs_path %}" />
+                                <br/>
+                                 <br/>
+                             {% endif %}
+                             {% if running_jobs_path %}
+                                 <img class="load-image" src="{% static running_jobs_path %}" />
+                                 <br/>
+                                 <br/>
+                             {% endif %}
+                             {% if waiting_jobs_path %}
+                                 <img class="load-image" src="{% static waiting_jobs_path %}" />
+                                 <br/>
+                                 <br/>
+                             {% endif %}
+                             {% if staging_jobs_path %}
+                                 <img class="load-image" src="{% static staging_jobs_path %}" />
+                                 <br/>
+                                 <br/>
+                             {% endif %}
+                             {% if suspended_jobs_path %}
+                                 <img class="load-image" src="{% static suspended_jobs_path %}" />
+                                 <br/>
+                                 <br/>
+                             {% endif %}
+                         </div>
+                        <div class="tl-more-btn">
+                            <i class="fa fa-chevron-down">
+                            </i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div style="margin-left: 15px">
+        No loading information
+        </div>
+    {% endif %}
+    {% if environments %}
+    <div class="row">
+            <div class="col-md-11 col-lg-11">
+                <div class="tl-wrapper">
+                    <div class="tl-inner">
+                        <div class="tl-status"></div>
+                        <div class="tl-main">
+                            <div class="tl-title">
+                            Execution environments
+                            </div>
+                        </div>
+                         <div class="tl-more no-display" >
+                             {% for environment in environments %}
+                                 <div class="module completed">
+                                    <div class="mod-type">
+                                        <i class="fas fa-sync"></i>
+                                    </div>
+                                     <div class="mod-title">
+                                         <a href="/environment/{{ environment.environment_id }}">{{ environment.environment_id }}</a>
+                                     </div>
+                                 </div>
+
+
+                               <!-- <a href="/computingshare/{{ share.computing_share_id }}">{{ share.computing_share_id }}</a>-->
+                             {% endfor %}
+
+                         </div>
+                        <div class="tl-more-btn">
+                            <i class="fa fa-chevron-down">
+                            </i>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        <div style="margin-left: 15px">
+        No execution environments
+        </div>
+    {% endif %}
+    <div class="col-md-2 col-lg-2"></div>
+</div>
+
 </body>
 </html>
